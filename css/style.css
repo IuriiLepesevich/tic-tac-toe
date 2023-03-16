@@ -12,9 +12,10 @@ html {
 }
 
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .gameboard {
@@ -28,4 +29,9 @@ body {
 
 .gameboard > div {
   border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 7rem;
 }

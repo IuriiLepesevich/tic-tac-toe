@@ -64,3 +64,34 @@ const Gameboard = (function () {
     getTurn,
   };
 })();
+
+function Player(symbol) {
+  const playerSymbol = symbol;
+
+  const getSymbol = () => playerSymbol;
+
+  const makeMove = (row, column) => {
+    if (Gameboard.getTurn() !== playerSymbol) return;
+    Gameboard.updateBoard(row, column);
+  };
+
+  return {
+    makeMove,
+    getSymbol,
+  };
+}
+
+const Players = [Player("X"), Player("0")];
+
+cells.forEach((cell) => {
+  cell.addEventListener("click", () => {
+    const { row } = cell.dataset;
+    const { column } = cell.dataset;
+
+    Players.filter(
+      (player) => player.getSymbol() === Gameboard.getTurn()
+    )[0].makeMove(row, column);
+  });
+});
+
+Gameboard.renderBoard();

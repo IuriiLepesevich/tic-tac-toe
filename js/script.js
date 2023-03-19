@@ -1,17 +1,24 @@
 const cells = document.querySelectorAll(".gameboard>div");
 
+const form = document.querySelector("form");
+
 const Gameboard = (function () {
   const gameboard = [
     ["", "", ""],
     ["", "", ""],
     ["", "", ""],
   ];
-
   let isPlaying = true;
-
   let turn = "X";
+  const Players = [];
 
   const getTurn = () => turn;
+
+  const getPlayers = () => Players;
+
+  const setPlayers = (player1, player2) => {
+    Players.push(player1, player2);
+  };
 
   const renderBoard = () => {
     gameboard.forEach((row, rowIndex) => {
@@ -31,20 +38,22 @@ const Gameboard = (function () {
     if (winner === "tie") {
       h1.textContent = "Tie!";
     } else {
-      h1.textContent = `Player ${winner} wins!`;
+      h1.textContent = `Player ${winner.getName()} wins!`;
     }
   };
 
   const checkForWinner = (row, column) => {
-    if (gameboard.every((elem) => !elem.includes(""))) endGame("tie");
-
     if (
       gameboard[row].every((elem) => elem === turn) ||
       gameboard.every((elem) => elem[column] === turn) ||
       gameboard.every((elem, index) => elem[index] === turn) ||
       gameboard.every((elem, index) => elem[2 - index] === turn)
-    )
-      endGame(turn);
+    ) 
+    {
+      const winner = Players.filter((player) => player.getSymbol() === turn)[0];
+      endGame(winner);
+    }
+    else if((gameboard.every((elem) => !elem.includes("")))) endGame("tie");
   };
 
   const updateBoard = (row, column) => {
@@ -62,13 +71,17 @@ const Gameboard = (function () {
     updateBoard,
     renderBoard,
     getTurn,
+    getPlayers,
+    setPlayers,
   };
 })();
 
-function Player(symbol) {
+function Player(symbol, name) {
   const playerSymbol = symbol;
+  const playerName = name;
 
   const getSymbol = () => playerSymbol;
+  const getName = () => playerName;
 
   const makeMove = (row, column) => {
     if (Gameboard.getTurn() !== playerSymbol) return;
@@ -78,20 +91,30 @@ function Player(symbol) {
   return {
     makeMove,
     getSymbol,
+    getName,
   };
 }
 
-const Players = [Player("X"), Player("0")];
+function startGame(event) {
+  event.preventDefault();
 
-cells.forEach((cell) => {
-  cell.addEventListener("click", () => {
-    const { row } = cell.dataset;
-    const { column } = cell.dataset;
+  const name1 = document.querySelector("#playerName1").value;
+  const name2 = document.querySelector("#playerName2").value;
 
-    Players.filter(
-      (player) => player.getSymbol() === Gameboard.getTurn()
-    )[0].makeMove(row, column);
+  Gameboard.setPlayers(Player("X", name1), Player("0", name2));
+
+  cells.forEach((cell) => {
+    cell.classList.remove("disabled");
+    cell.addEventListener("click", () => {
+      const { row } = cell.dataset;
+      const { column } = cell.dataset;
+
+      Gameboard.getPlayers()
+        .filter((player) => player.getSymbol() === Gameboard.getTurn())[0]
+        .makeMove(row, column);
+    });
   });
-});
+  Gameboard.renderBoard();
+}
 
-Gameboard.renderBoard();
+form.addEventListener("submit", startGame);

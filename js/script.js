@@ -11,8 +11,12 @@ const Gameboard = (function () {
   let isPlaying = true;
   let turn = "X";
   const Players = [];
+  const h1 = document.querySelector(".result");
+  let gameNumber = 0;
 
   const getTurn = () => turn;
+
+  const getGameNumber = () => gameNumber;
 
   const getPlayers = () => Players;
 
@@ -31,8 +35,21 @@ const Gameboard = (function () {
     });
   };
 
+  const restart = () => {
+    h1.textContent = "Game result";
+    turn = "X";
+    Players.splice(0, Players.length);
+    gameboard.forEach((row, rowIndex) => {
+      row.forEach((cell, cellIndex) => {
+        gameboard[rowIndex][cellIndex] = "";
+      });
+    });
+    isPlaying = true;
+    gameNumber = gameNumber + 1;
+    renderBoard();
+  };
+
   const endGame = (winner) => {
-    const h1 = document.querySelector(".result");
     isPlaying = false;
 
     if (winner === "tie") {
@@ -48,12 +65,10 @@ const Gameboard = (function () {
       gameboard.every((elem) => elem[column] === turn) ||
       gameboard.every((elem, index) => elem[index] === turn) ||
       gameboard.every((elem, index) => elem[2 - index] === turn)
-    ) 
-    {
+    ) {
       const winner = Players.filter((player) => player.getSymbol() === turn)[0];
       endGame(winner);
-    }
-    else if((gameboard.every((elem) => !elem.includes("")))) endGame("tie");
+    } else if (gameboard.every((elem) => !elem.includes(""))) endGame("tie");
   };
 
   const updateBoard = (row, column) => {
@@ -73,6 +88,8 @@ const Gameboard = (function () {
     getTurn,
     getPlayers,
     setPlayers,
+    restart,
+    getGameNumber,
   };
 })();
 
@@ -98,10 +115,14 @@ function Player(symbol, name) {
 function startGame(event) {
   event.preventDefault();
 
+  Gameboard.restart();
+
   const name1 = document.querySelector("#playerName1").value;
   const name2 = document.querySelector("#playerName2").value;
 
   Gameboard.setPlayers(Player("X", name1), Player("0", name2));
+
+  if (Gameboard.getGameNumber() > 1) return;
 
   cells.forEach((cell) => {
     cell.classList.remove("disabled");
@@ -114,7 +135,6 @@ function startGame(event) {
         .makeMove(row, column);
     });
   });
-  Gameboard.renderBoard();
 }
 
 form.addEventListener("submit", startGame);
